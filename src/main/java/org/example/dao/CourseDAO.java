@@ -2,7 +2,9 @@ package org.example.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.example.App;
+import org.example.exceptions.DAOException;
 import org.example.model.Course;
+import org.example.utils.ResultSetMapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,27 +28,27 @@ public class CourseDAO {
                 try {
                     preparedStatement.execute();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Add course error: failed on execution",e);
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Add course error: failed on prepared statement creation",e);
             } finally {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Add course error: failed to close prepared statement",e);
                 }
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Add course error: failed to close connection statement",e);
             }
         }
     }
 
-    public List<Course> showAllCourses() {
+    public List<Course> getAllCourses() {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -59,30 +61,27 @@ public class CourseDAO {
                 try {
                     resultSet = preparedStatement.executeQuery();
                     while (resultSet.next()) {
-                        int courseId = resultSet.getInt(1);
-                        String courseName = resultSet.getString(2);
-                        String courseDescription = resultSet.getString(3);
-                        result.add(new Course(courseId, courseName, courseDescription));
+                        result.add(ResultSetMapper.mapToCourse(resultSet));
                     }
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Get all courses: failed on executeQuery",e);
                 } finally {
                     resultSet.close();
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Get all courses: failed on prepared statement",e);
             } finally {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Get all courses: failed to close connection",e);
                 }
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Get all courses: failed to get connection",e);
             }
         }
         return result;

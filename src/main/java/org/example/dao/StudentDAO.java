@@ -2,7 +2,9 @@ package org.example.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.example.App;
+import org.example.exceptions.DAOException;
 import org.example.model.Student;
+import org.example.utils.ResultSetMapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,22 +30,22 @@ public class StudentDAO {
                 try {
                     preparedStatement.execute();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Add student: failed to execute query",e);
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Add student: failed to set prepared statement",e);
             } finally {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Add student: failed to close prepared statement",e);
                 }
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Add student: failed to close connection",e);
             }
         }
     }
@@ -59,22 +61,22 @@ public class StudentDAO {
                 try {
                     preparedStatement.execute();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Delete student: failed to execute prepared statement",e);
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Delete student: failed to set prepared statement",e);
             } finally {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Delete student: failed to close prep statement",e);
                 }
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Delete student: failed to close connection",e);
             }
         }
     }
@@ -98,13 +100,10 @@ public class StudentDAO {
                 try {
                     resultSet = preparedStatement.executeQuery();
                     while (resultSet.next()) {
-                        int studentId = resultSet.getInt(1);
-                        int groupId = resultSet.getInt(2);
-                        String lastName = resultSet.getString(4);
-                        result.add(new Student(studentId, groupId, firstName, lastName));
+                        result.add(ResultSetMapper.mapToStudent(resultSet));
                     }
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("findAllStudentsByCourseAndByName: failed to execute prepared statement",e);
                 } finally {
                     resultSet.close();
                 }
@@ -114,14 +113,14 @@ public class StudentDAO {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("findAllStudentsByCourseAndByName: failed to close prepared statement",e);
                 }
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("findAllStudentsByCourseAndByName: failed to close connection",e);
             }
         }
         return result;
@@ -140,22 +139,22 @@ public class StudentDAO {
                 try {
                     preparedStatement.execute();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("assignCourseToStudentById: failed to execute prepared statement",e);
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("assignCourseToStudentById: failed to set prepared statement",e);
             } finally {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("assignCourseToStudentById: failed close prepared statement",e);
                 }
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("assignCourseToStudentById: failed close connection",e);
             }
         }
     }
@@ -174,22 +173,22 @@ public class StudentDAO {
                 try {
                     preparedStatement.execute();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("removeStudentFromCourse: failed to execute prep statement",e);
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("removeStudentFromCourse: failed to set  prep statement",e);
             } finally {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("removeStudentFromCourse: failed to close prep statement",e);
                 }
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("removeStudentFromCourse: failed to close connection",e);
             }
         }
     }

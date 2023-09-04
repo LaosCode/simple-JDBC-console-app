@@ -2,7 +2,9 @@ package org.example.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.example.App;
+import org.example.exceptions.DAOException;
 import org.example.model.Group;
+import org.example.utils.ResultSetMapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,27 +28,27 @@ public class GroupDAO {
                 try {
                     preparedStatement.execute();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Add group: failed to execute", e);
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Add group: failed to prepare statement", e);
             } finally {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("Add group: failed to close prepared statement", e);
                 }
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("Add group: failed to close connection", e);
             }
         }
     }
 
-    public List<Group> findAllGroupWithLessOrEqualStudents(int numberOfStudents) {
+    public List<Group> findAllHaveCertainAmountOfStudents(int minimumNumberOfStudents) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -59,33 +61,31 @@ public class GroupDAO {
                                 " from students join groups g on students.group_id = g.group_id" +
                                 " group by g.group_id" +
                                 " having count(group_name) >= ?");
-                preparedStatement.setInt(1, numberOfStudents);
+                preparedStatement.setInt(1, minimumNumberOfStudents);
                 try {
                     resultSet = preparedStatement.executeQuery();
                     while (resultSet.next()) {
-                        int groupId = resultSet.getInt(1);
-                        String groupName = resultSet.getString(2);
-                        result.add(new Group(groupId, groupName));
+                        result.add(ResultSetMapper.mapToGroup(resultSet));
                     }
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("findAllHaveCertainAmountOfStudents: failed to execute resultQuery", e);
                 } finally {
                     resultSet.close();
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("findAllHaveCertainAmountOfStudents: failed to set prepared statement", e);
             } finally {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    throw new DAOException("findAllHaveCertainAmountOfStudents: failed to close prepared statement", e);
                 }
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new DAOException("findAllHaveCertainAmountOfStudents: failed to close connection", e);
             }
         }
         return result;
