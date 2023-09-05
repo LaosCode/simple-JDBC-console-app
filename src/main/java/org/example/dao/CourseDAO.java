@@ -1,5 +1,6 @@
 package org.example.dao;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.example.App;
 import org.example.exceptions.DAOException;
@@ -13,77 +14,62 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CourseDAO {
+
+    private Connection connection;
+
     public void addCourse(String courseName, String courseDescription) {
-        Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
-            connection = App.getConnection();
+            preparedStatement = connection.prepareStatement(
+                    "INSERT INTO courses(course_name, course_description) VALUES (?,?)");
+            preparedStatement.setString(1, courseName);
+            preparedStatement.setString(2, courseDescription);
             try {
-                preparedStatement = connection.prepareStatement(
-                        "INSERT INTO courses(course_name, course_description) VALUES (?,?)");
-                preparedStatement.setString(1, courseName);
-                preparedStatement.setString(2, courseDescription);
-                try {
-                    preparedStatement.execute();
-                } catch (SQLException e) {
-                    throw new DAOException("Add course error: failed on execution",e);
-                }
+                preparedStatement.execute();
             } catch (SQLException e) {
-                throw new DAOException("Add course error: failed on prepared statement creation",e);
-            } finally {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    throw new DAOException("Add course error: failed to close prepared statement",e);
-                }
+                throw new DAOException("Add course error: failed on execution", e);
             }
+        } catch (SQLException e) {
+            throw new DAOException("Add course error: failed on prepared statement creation", e);
         } finally {
             try {
-                connection.close();
+                preparedStatement.close();
             } catch (SQLException e) {
-                throw new DAOException("Add course error: failed to close connection statement",e);
+                throw new DAOException("Add course error: failed to close prepared statement", e);
             }
         }
+
     }
 
     public List<Course> getAllCourses() {
-        Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         List<Course> result = new ArrayList<>();
         try {
-            connection = App.getConnection();
+            preparedStatement =
+                    connection.prepareStatement("select * from courses");
             try {
-                preparedStatement =
-                        connection.prepareStatement("select * from courses");
-                try {
-                    resultSet = preparedStatement.executeQuery();
-                    while (resultSet.next()) {
-                        result.add(ResultSetMapper.mapToCourse(resultSet));
-                    }
-                } catch (SQLException e) {
-                    throw new DAOException("Get all courses: failed on executeQuery",e);
-                } finally {
-                    resultSet.close();
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    result.add(ResultSetMapper.mapToCourse(resultSet));
                 }
             } catch (SQLException e) {
-                throw new DAOException("Get all courses: failed on prepared statement",e);
+                throw new DAOException("Get all courses: failed on executeQuery", e);
             } finally {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    throw new DAOException("Get all courses: failed to close connection",e);
-                }
+                resultSet.close();
             }
+        } catch (SQLException e) {
+            throw new DAOException("Get all courses: failed on prepared statement", e);
         } finally {
             try {
-                connection.close();
+                preparedStatement.close();
             } catch (SQLException e) {
-                throw new DAOException("Get all courses: failed to get connection",e);
+                throw new DAOException("Get all courses: failed to close connection", e);
             }
         }
+
         return result;
     }
 }

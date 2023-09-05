@@ -2,20 +2,56 @@ package org.example;
 
 import lombok.NoArgsConstructor;
 import org.example.dao.CourseDAO;
+import org.example.dao.DAOFactory;
 import org.example.dao.GroupDAO;
 import org.example.dao.StudentDAO;
 import org.example.model.Student;
+import org.flywaydb.core.Flyway;
+import org.postgresql.ds.PGSimpleDataSource;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-@NoArgsConstructor
 public class DbInitializer {
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final GroupDAO groupDao = new GroupDAO();
-    private final CourseDAO courseDAO = new CourseDAO();
 
-    public void initDb() {
+    private final StudentDAO studentDAO;
+    private final GroupDAO groupDao;
+    private final CourseDAO courseDAO;
+
+    public DbInitializer(DAOFactory daoFactory) {
+        studentDAO = daoFactory.getStudentDAO();
+        groupDao = daoFactory.getGroupDAO();
+        courseDAO = daoFactory.getCourseDAO();
+    }
+
+    public void createAndInitDb() {
+        dbMigration();
+        initDb();
+    }
+
+    private void dbMigration() {
+        PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        try {
+            dataSource.setUrl("jdbc:postgresql://localhost/school");
+            dataSource.setDatabaseName("school");
+            dataSource.setUser("postgres");
+            dataSource.setPassword("111111");
+            dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        Flyway flyway = Flyway.configure().dataSource(dataSource).load();
+        System.out.println(flyway.info().toString());
+        flyway.migrate();
+        try {
+            dataSource.getConnection().close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void initDb() {
         List<String> groupNames = Arrays.asList(
                 "AB-45",
                 "XY-78",
@@ -100,6 +136,7 @@ public class DbInitializer {
             studentDAO.assignCourseToStudentById(generateRandomInt(10) + 1, generateRandomInt(200) + 1);
         }
     }
+
     private int generateRandomInt(int number) {
         return (int) ((Math.random() * number));
     }

@@ -1,8 +1,8 @@
 package org.example;
 
-import lombok.AllArgsConstructor;
-
-import org.example.utils.SpringScriptUtility;
+import org.example.dao.DAOFactory;
+import org.flywaydb.core.Flyway;
+import org.postgresql.ds.PGSimpleDataSource;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,25 +15,13 @@ public class App {
     private Boolean exit;
     private Controller controller;
     private View view;
+    private DAOFactory daoFactory;
 
     public App() {
-        createAndInitDb();
+        daoFactory = new DAOFactory(getConnection());
         view = new View();
-        controller = new Controller(view);
+        controller = new Controller(view,daoFactory);
         exit = true;
-    }
-
-    public static Connection getConnection() {
-        try {
-            return DriverManager.getConnection(Constants.DB_URL, Constants.USER, Constants.PASS);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void createAndInitDb() {
-//        DbInitializer dbInitializer = new DbInitializer();
-//        dbInitializer.initDb();
     }
 
     public static void main(String[] args) {
@@ -42,6 +30,8 @@ public class App {
     }
 
     public void run() {
+        DbInitializer dbInitializer = new DbInitializer(daoFactory);
+        dbInitializer.createAndInitDb();
         view.printMsg("Welcome to Console Application type EXIT to quit application");
         while (exit) {
             view.showAllActions();
@@ -78,6 +68,13 @@ public class App {
                 break;
         }
         view.printMsg("Completed!");
+    }
+    public static Connection getConnection() {
+        try {
+            return DriverManager.getConnection(Constants.DB_URL, Constants.USER, Constants.PASS);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

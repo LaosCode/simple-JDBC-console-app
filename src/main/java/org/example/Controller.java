@@ -2,18 +2,26 @@ package org.example;
 
 import lombok.RequiredArgsConstructor;
 import org.example.dao.CourseDAO;
+import org.example.dao.DAOFactory;
 import org.example.dao.GroupDAO;
 import org.example.dao.StudentDAO;
 import org.example.model.Student;
 
-@RequiredArgsConstructor
+import java.sql.Connection;
+
 public class Controller {
-
-    private StudentDAO studentDAO = new StudentDAO();
-    private CourseDAO courseDAO = new CourseDAO();
-    private GroupDAO groupDAO = new GroupDAO();
-
+    private DAOFactory daoFactory;
+    private StudentDAO studentDAO;
+    private CourseDAO courseDAO;
+    private GroupDAO groupDAO;
     private final View view;
+
+    public Controller(View view, DAOFactory daoFactory) {
+        this.view = view;
+        studentDAO = daoFactory.getStudentDAO();
+        courseDAO = daoFactory.getCourseDAO();
+        groupDAO = daoFactory.getGroupDAO();
+    }
 
     public void getAllGroupWithLessOrEqualStudentsCommand() {
         view.printMsg("Type number of students:");
@@ -55,7 +63,7 @@ public class Controller {
         studentDAO.assignCourseToStudentById(courseId, studentId);
     }
 
-    public void removeStudentFromCourse(){
+    public void removeStudentFromCourse() {
         view.printMsg("Type student id:");
         int studentId = view.requestInt();
         view.printMsg("Type course id to be removed:");
