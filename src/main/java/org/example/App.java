@@ -1,8 +1,6 @@
 package org.example;
 
 import org.example.dao.DAOFactory;
-import org.flywaydb.core.Flyway;
-import org.postgresql.ds.PGSimpleDataSource;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

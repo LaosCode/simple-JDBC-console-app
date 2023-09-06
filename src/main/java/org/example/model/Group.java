@@ -7,7 +7,6 @@ import lombok.ToString;
 
 @Data
 @ToString
-@RequiredArgsConstructor
 public class Group {
     private int id;
     private String name;
