@@ -1,7 +1,7 @@
 ## simple-JDBC-console-app
 JDBC console application which allows to access and modify DB from console. 
 
-# Technologies used:
+### Technologies used:
 * JAVA 8+;
 * Maven;
 * Postgesql;
